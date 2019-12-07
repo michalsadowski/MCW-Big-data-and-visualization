@@ -22,6 +22,8 @@ The names of manufacturers, products, or URLs are provided for informational pur
 
 Microsoft and the trademarks listed at <https://www.microsoft.com/en-us/legal/intellectualproperty/Trademarks/Usage/General.aspx> are trademarks of the Microsoft group of companies. All other trademarks are property of their respective owners.
 
+This lab is based on Microsoft labs avaialble on [following website: ](https://github.com/microsoft/MCW-Big-data-and-visualization/tree/master/Hands-on%20lab)
+
 **Contents**
 
 <!-- TOC -->
@@ -29,10 +31,10 @@ Microsoft and the trademarks listed at <https://www.microsoft.com/en-us/legal/in
 - [Big data and visualization before the hands-on lab setup guide](#big-data-and-visualization-before-the-hands-on-lab-setup-guide)
   - [Requirements](#requirements)
   - [Before the hands-on lab](#before-the-hands-on-lab)
-    - [Task 1: Provision Azure Databricks](#task-1-provision-azure-databricks)
-    - [Task 2: Create Azure Storage account](#task-2-create-azure-storage-account)
-    - [Task 3: Create storage container](#task-3-create-storage-container)
-    - [Task 4: Provision Azure Data Factory](#task-4-provision-azure-data-factory)
+    - [Task 1: Redeem your Azure Pass](#task-1-redeem-your-azure-pass)
+    - [Task 2: Provision Windows 10 VM](#task-2-provision-windows-10-vm)
+    - [Task 3: Download and stage data to be processed](#task-3-download-and-stage-data-to-be-processed)
+    - [Task 4: Install and configure Azure Data Factory Integration Runtime on your machine](#task-4-install-and-configure-azure-data-factory-integration-runtime-on-your-machine)
     - [Task 5: Download and install Power BI Desktop](#task-5-download-and-install-power-bi-desktop)
 
 <!-- /TOC -->
@@ -53,121 +55,177 @@ Duration: 30 minutes
 
 In this exercise, you will set up your environment for use in the rest of the hands-on lab. You should follow all the steps provided in the Before the Hands-on Lab section to prepare your environment _before_ attending the hands-on lab.
 
-### Task 1: Provision Azure Databricks
+### Task 1: Redeem your Azure Pass
 
-Azure Databricks is an Apache Spark-based analytics platform optimized for Azure. It will be used in this lab to build and train a machine learning model used to predict flight delays.
+1. Open web browser and go to [Microsoft Azure Pass](https://www.microsoftazurepass.com/) website, click on **Start**
 
-> **Note**: To view the Azure portal menu, select the menu icon in the upper left-hand corner.
+![](./media/azurepass1.png)
 
-![The Azure portal menu is highlighted.](media/portal-menu.png 'Azure portal menu')
+2. Check if account is correct and click on **Confirm Microsoft Account**
 
-1. In the [Azure Portal](https://portal.azure.com) (https://portal.azure.com), select **+ Create a resource** within the portal menu, then type "Azure Databricks" into the search bar. Select Azure Databricks from the results.
+![](./media/azurepass2.png)
 
-   ![Select create a resource, type in Azure Databricks, then select it from the results list](media/create-azure-databricks-resource.png)
+3. Provide Azure Pass and click on **Claim Promo Code**
 
-2. Select Create on the bottom of the blade that follows.
+![](./media/azurepass3.png)
 
-3. Set the following configuration on the Azure Databricks Service creation form:
+4. In the [Azure portal](https://portal.azure.com/), go to search and type **Subscriptions** and check if Azure Pass subscription is available:
 
-   - **Name**: Enter a unique name as indicated by a green checkmark.
+![](./media/azure-portal-subscriptions1.png)
 
-   - **Subscription**: Select the subscription you are using for this hands-on lab.
+![](./media/azure-portal-subscriptions2.png)
 
-   - **Resource Group**: Select **Create new** and enter a unique name, such as "hands-on-lab-bigdata".
+### Task 2: Provision Windows 10 VM
 
-   - **Location**: Select a region close to you. **_(If you are using an Azure Pass, select South Central US.)_**
+In this task, you will provision a virtual machine (VM) in Azure. The VM image used will have Visual Studio Community 2019 installed.
 
-   - **Pricing**: Select Premium.
+1. In the [Azure portal](https://portal.azure.com/), select **+Create a resource**, 
 
-   - **Deploy Azure Databricks workspace in your Virtual Network**: Select No.
+    ![+Create a resource is selected in the Azure navigation pane, and "visual studio 2019" is entered into the Search the Marketplace box. Visual Studio Community 2019 on Windows Server 2016 (x64) is selected in the results.](./media/azure-portal-create-vm1.png "Create Windows Server 2016 with Visual Studio Community 2019")
 
-   ![Complete the Azure Databricks Service creation form with the options as outlined above.](media/azure-databricks-create-blade.png)
+2. Enter "visual studio 2019" into the Search the Marketplace box, and then select **Visual Studio 2019 Latest** from the results.
 
-4. Select **Create** to finish and submit.
+	![](./media/azure-portal-create-vm2.png "Create Windows Server 2016 with Visual Studio Community 2019")
 
-### Task 2: Create Azure Storage account
+3. On the Visual Studio 2019 blade, select **Visual Studio 2019 Community (latest release) on Windows Server 2019 (x64)** from the Select a software plan drop down list and then select **Create**.
 
-Create a new Azure Storage account that will be used to store historic and scored flight and weather data sets for the lab.
+    ![Visual Studio 2019 Community (latest release) on Windows Server 2019 (x64) is highlighted in the Select a software plan list on the Visual Studio 2019 blade.](./media/azure-portal-create-vm3.png "Visual Studio 2019")
 
-1. In the [Azure Portal](https://portal.azure.com) (<https://portal.azure.com>), select **+ Create a resource**, then type "storage" into the search bar. Select **Storage account** from the results.
+4. On the Create a virtual machine blade check if you are using Azure Pass subscription. Click on **Create new** Resource Group and proivde **Name** as **hands-on-lab**
 
-   ![Select create a resource, type in storage, then select Storage account... from the results list](media/create-azure-storage-resource.png)
+![](./media/azure-portal-create-vm4.png "Visual Studio 2019")
 
-2. Select Create on the bottom of the blade that follows.
+5. On the Create a virtual machine **Basics** tab, set the following configuration:
 
-3. Set the following configuration on the Azure Storage account creation form:
+    - **Subscription**: Select the Azure Pass subscription.
+    - **Resource Group**: Select the hands-on-lab resource group from the list of existing resource groups.
+    - **Virtual machine name**: Enter JumpBox.
+    - **Region**: Select the region you are using for resources in this hands-on lab. (Preferably **(Europe) North Europe**)
+    - **Availability options**: Select no infrastructure redundancy required.
+    - **Image**: Leave Visual Studio 2019 Community (latest release) on Windows Server 2019 (x64) selected.
+    - **Size**: Select **Change size**, and select Standard D2 v3 from the list and then select **Accept**.
+    - **Username**: Enter **mtadmin**
+    - **Password**: Enter **Password.1234567890**
+    - **Public inbound ports**: Choose Allow selected ports.
+    - **Select inbound ports**: Select RDP (3389) in the list.
 
-   - **Subscription**: Select the subscription you are using for this hands-on lab.
+    ![Screenshot of the Basics tab, with fields set to the previously mentioned settings.](./media/azure-portal-create-vm5.png "Create a virtual machine Basics tab")
 
-   - **Resource group**: Select the same resource group you created at the beginning of this lab.
+6. Select **Review + create** to validate the configuration.
 
-   - **Storage account name**: Enter a unique name as indicated by a green checkmark.
+7. On the **Review + create** tab, ensure the Validation passed message is displayed, and then select **Create** to provision the virtual machine.
 
-   - **Location**: Select the same region you used for Azure Databricks.
+    ![The Review + create tab is displayed, with a Validation passed message.](./media/azure-portal-create-vm6.png "Create a virtual machine Review + create tab")
 
-   - **Performance**: Standard
+9. It will take approximately 5 minutes for the VM to finish provisioning. You can move on to the next task while you wait.
 
-   - **Account kind**: BlobStorage
 
-   - **Replication**: Read-access geo-redundant storage (RA-GRS)
+### Task 3: Download and stage data to be processed
 
-   - **Access tier**: Hot
+1. Go to [Azure Portal](https://portal.azure.com) -> **hands-on-lab** resource group and click on **JumpBox** Virtual Machine
 
-   ![Complete the Azure storage account creation form with the options as outlined above.](media/azure-storage-create-blade.png)
+![](./media/azure-portal-jumpbox1.png)
 
-4. Select **Create** to finish and submit.
+2. Check if machine is in state **Running** and connect VM using RDP
 
-### Task 3: Create storage container
+![](./media/azure-portal-jumpbox2.png)
 
-In this task, you will create a storage container in which you will store your flight and weather data files.
+3. Select **Connect** on the Remote Desktop Connection dialog.
 
-1. From the side menu in the Azure portal, choose **Resource groups**, then enter your resource group name into the filter box, and select it from the list.
+![](./media/azure-portal-jumpbox3.png)
 
-2. Next, select your lab Azure Storage account from the list.
+4. Enter the following credentials when prompted, and then select **OK**:
 
-   ![Select the lab Azure Storage account from within your lab resource group](media/select-azure-storage-account.png)
+    - **User name**: mtadmin
+    - **Password**: Password.1234567890 
 
-3. Select **Containers** (1) from the menu. Select **+ Container** (2) on the Blobs blade, enter **sparkcontainer** for the name (3), leaving the public access level set to Private. Select **OK** (4) to create the container.
+![](./media/azure-portal-jumpbox4.png)
 
-   ![Screenshot showing the steps to create a new storage container](media/azure-storage-create-container.png)
+5. Select **Yes** to connect, if prompted that the identity of the remote computer cannot be verified.
 
-### Task 4: Provision Azure Data Factory
+![](./media/azure-portal-jumpbox5.png)
 
-Create a new Azure Data Factory instance that will be used to orchestrate data transfers for analysis.
+6. Run Internet Explorer and click **OK** on Set up Internet Explorer 11
 
-1. In the [Azure Portal](https://portal.azure.com) (<https://portal.azure.com>), select **+ Create a resource**, then type "Data Factory" into the search bar. Select **Data Factory** from the results.
+![](./media/azure-portal-jumpbox6.png)
 
-   ![Select create a resource, type in Data Factory, then select Data Factory from the results list](media/create-azure-data-factory.png)
+7. Download the AdventureWorks sample data from <http://bit.ly/2zi4Sqa>.
 
-2. Select Create on the bottom of the blade that follows.
+8. Extract it to a new folder called **C:\\Data**.
 
-3. Set the following configuration on the Data Factory creation form:
 
-   - **Name**: Enter a unique name as indicated by a green checkmark.
+### Task 4: Install and configure Azure Data Factory Integration Runtime on your machine
 
-   - **Subscription**: Select the subscription you are using for this hands-on lab.
+1. To download the latest version of Azure Data Factory Integration Runtime, go to <https://www.microsoft.com/en-us/download/details.aspx?id=39717>.
 
-   - **Resource Group**: Select the same resource group you created at the beginning of this lab.
+   ![The Azure Data Factory Integration Runtime Download webpage displays.](./media/integration-runtime1.png 'Azure Data Factory Integration Runtime Download webpage')
 
-   - **Version**: Select V2.
+2. Select Download, then choose the download you want from the next screen.
 
-   - **Location**: Select any region close to you.
+   ![Under Choose the download you want, the MSI file is selected.](./media/integration-runtime2.png 'Choose the download you want section')
 
-   - **Enable GIT**: Unchecked.
+3. Run the installer, once downloaded.
 
-   **_Understanding Data Factory Location:_**
-   The Data Factory location is where the metadata of the data factory is stored and where the triggering of the pipeline is initiated from. Meanwhile, a data factory can access data stores and compute services in other Azure regions to move data between data stores or process data using compute services. This behavior is realized through the [globally available IR](https://azure.microsoft.com/en-us/global-infrastructure/services/?products=data-factory) to ensure data compliance, efficiency, and reduced network egress costs.
+4. When you see the following screen, select Next.
 
-   The IR Location defines the location of its back-end compute, and essentially the location where the data movement, activity dispatching, and SSIS package execution are performed. The IR location can be different from the location of the data factory it belongs to.
+   ![The Welcome page in the Microsoft Integration Runtime Setup Wizard displays.](./media/integration-runtime3.png 'Microsoft Integration Runtime Setup Wizard')
 
-   ![Complete the Azure Data Factory creation form with the options as outlined above.](media/azure-data-factory-create-blade.png)
+5. Check the box to accept the terms and select Next.
 
-4. Select **Create** to finish and submit.
+   ![On the End-User License Agreement page, the check box to accept the license agreement is selected, as is the Next button.](./media/integration-runtime4.png 'End-User License Agreement page')
+
+6. Accept the default Destination Folder, and select Next.
+
+   ![On the Destination folder page, the destination folder is set to C;\Program Files\Microsoft Integration Runtime\ and the Next button is selected.](./media/integration-runtime5.png 'Destination folder page')
+
+7. Choose Install to complete the installation.
+
+   ![On the Ready to install Microsoft Integration Runtime page, the Install button is selected.](./media/integration-runtime6.png 'Ready to install page')
+
+8. Select Finish once the installation has completed.
+
+   ![On the Completed the Microsoft Integration Runtime Setup Wizard page, the Finish button is selected.](./media/integration-runtime7.png 'Completed the Wizard page')
+
+9. After selecting Finish, the following screen will appear. Keep it open for now. You will come back to this screen once the Data Factory in Azure has been provisioned, and obtain the gateway key so we can connect Data Factory to this "on-premises" server.
+
+   ![The Microsoft Integration Runtime Configuration Manager, Register Integration Runtime page displays.](./media/integration-runtime8.png 'Register Integration Runtime page')
 
 ### Task 5: Download and install Power BI Desktop
 
 Power BI desktop is required to make a connection to your Azure Databricks environment when creating the Power BI dashboard.
 
-1. Download and install [Power BI Desktop](https://powerbi.microsoft.com/desktop/).
+1. To download the latest version of Power BI Desktop, go to[Power BI Desktop](https://powerbi.microsoft.com/desktop/). and select **See Download or Lanugage Options**
+
+![](./media/powerbi1.png)
+
+2. Choose the download you want from the next screen.
+
+![](./media/powerbi2.png)
+
+3. Run the installer, once downloaded.
+
+4. On Welcome screen, select English and click Next.
+
+![](./media/powerbi3.png)
+
+4. When you see the following screen, select Next.
+
+![](./media/powerbi4.png)
+
+5. Check the box to accept the terms and select Next.
+
+![](./media/powerbi5.png)
+
+6. Accept the default Destination Folder, and select Next.
+
+![](./media/powerbi6.png)
+
+7. Choose Install to complete the installation.
+
+![](./media/powerbi7.png)
+
+8. Select Finish once the installation has completed.
+
+![](./media/powerbi8.png)
 
 You should follow all these steps provided _before_ attending the Hands-on lab.
