@@ -31,19 +31,21 @@ Microsoft and the trademarks listed at https://www.microsoft.com/en-us/legal/int
   - [Overview](#overview)
   - [Solution architecture](#solution-architecture)
   - [Requirements](#requirements)
-  - [Exercise 1: Retrieve lab environment information and create Databricks cluster](#exercise-1-retrieve-lab-environment-information-and-create-databricks-cluster)
-    - [Task 1: Retrieve Azure Storage account information and Subscription Id](#task-1-retrieve-azure-storage-account-information-and-subscription-id)
-    - [Task 2: Create an Azure Databricks cluster](#task-2-create-an-azure-databricks-cluster)
+  - [Exercise 1: Retrieve lab environment information and create Databricks cluster](#exercise-1-retrieve-lab-environment-information-and-create-databricks-cluster-and-create-databricks-cluster)
+    - [Task 1: Create Azure Storage account](#task-1-create-azure-storage-account)
+    - [Task 2: Create storage container](#task-2-create-storage-container)
+    - [Task 3: Provision Azure Databricks](#task-3-provision-azure-databricks)
+    - [Task 4: Retrieve Azure Storage account information and Subscription Id](#task-4-retrieve-azure-storage-account-information-and-subscription-id)
+    - [Task 5: Create an Azure Databricks cluster](#task-5-create-an-azure-databricks-cluster)
   - [Exercise 2: Load Sample Data and Databricks Notebooks](#exercise-2-load-sample-data-and-databricks-notebooks)
     - [Task 1: Upload the Sample Datasets](#task-1-upload-the-sample-datasets)
     - [Task 2: Install Azure ML library on the cluster](#task-2-install-azure-ml-library-on-the-cluster)
     - [Task 3: Open Azure Databricks and complete lab notebooks](#task-3-open-azure-databricks-and-complete-lab-notebooks)
   - [Exercise 3: Setup Azure Data Factory](#exercise-3-setup-azure-data-factory)
-    - [Task 1: Download and stage data to be processed](#task-1-download-and-stage-data-to-be-processed)
-    - [Task 2: Install and configure Azure Data Factory Integration Runtime on your machine](#task-2-install-and-configure-azure-data-factory-integration-runtime-on-your-machine)
-    - [Task 3: Configure Azure Data Factory](#task-3-configure-azure-data-factory)
+    - [Task 1: Provision Azure Data Factory](#task-1-provision-azure-data-factory)
+    - [Task 2: Configure Azure Data Factory](#task-2-configure-azure-data-factory)
   - [Exercise 4: Develop a data factory pipeline for data movement](#exercise-4-develop-a-data-factory-pipeline-for-data-movement)
-    - [Task 1: Create copy pipeline using the Copy Data Wizard](#task-1-create-copy-pipeline-using-the-copy-data-wizard)
+    - [Task: Create copy pipeline using the Copy Data Wizard](#task-create-copy-pipeline-using-the-copy-data-wizard)
   - [Exercise 5: Operationalize ML scoring with Azure Databricks and Data Factory](#exercise-5-operationalize-ml-scoring-with-azure-databricks-and-data-factory)
     - [Task 1: Create Azure Databricks Linked Service](#task-1-create-azure-databricks-linked-service)
     - [Task 2: Trigger workflow](#task-2-trigger-workflow)
@@ -92,13 +94,91 @@ Below is a diagram of the solution architecture you will build in this lab. Plea
 
 3. Follow all the steps provided in [Before the Hands-on Lab](Before%20the%20HOL%20-%20Big%20data%20and%20visualization.md).
 
-## Exercise 1: Retrieve lab environment information and create Databricks cluster
+## Exercise 1: Retrieve lab environment information and create Databricks cluster and create Databricks cluster
 
-Duration: 10 minutes
+Duration: 30 minutes
 
 In this exercise, you will retrieve your Azure Storage account name and access key and your Azure Subscription Id and record the values to use later within the lab. You will also create a new Azure Databricks cluster.
 
-### Task 1: Retrieve Azure Storage account information and Subscription Id
+### Task 1: Create Azure Storage account
+
+Create a new Azure Storage account that will be used to store historic and scored flight and weather data sets for the lab.
+
+1. In the [Azure Portal](https://portal.azure.com) (<https://portal.azure.com>), select **+ Create a resource**, then type "storage" into the search bar. Select **Storage account** from the results.
+
+   ![Select create a resource, type in storage, then select Storage account... from the results list](./media/storage1.png)
+
+2. Select Create on the bottom of the blade that follows.
+
+3. Set the following configuration on the Azure Storage account creation form:
+
+   - **Subscription**: Select the subscription you are using for this hands-on lab.
+
+   - **Resource group**: Select the same resource group you created at the beginning of this lab.
+
+   - **Storage account name**: Enter a unique name as indicated by a green checkmark.
+
+   - **Location**: Select the same region you used for Azure Databricks.
+
+   - **Performance**: Standard
+
+   - **Account kind**: BlobStorage
+
+   - **Replication**: Read-access geo-redundant storage (RA-GRS)
+
+   - **Access tier**: Hot
+
+   ![Complete the Azure storage account creation form with the options as outlined above.](./media/storage2.png)
+
+4. Select **Create** to finish and submit.
+
+### Task 2: Create storage container
+
+In this task, you will create a storage container in which you will store your flight and weather data files.
+
+1. From the side menu in the Azure portal, choose **Resource groups**, then enter your resource group name into the filter box, and select it from the list.
+
+2. Next, select your lab Azure Storage account from the list.
+
+   ![Select the lab Azure Storage account from within your lab resource group](./media/storage3.png)
+
+3. Select **Containers** (1) from the menu. Select **+ Container** (2) on the Blobs blade, enter **sparkcontainer** for the name (3), leaving the public access level set to Private. Select **OK** (4) to create the container.
+
+   ![Screenshot showing the steps to create a new storage container](media/azure-storage-create-container.png)
+
+### Task 3: Provision Azure Databricks
+
+Azure Databricks is an Apache Spark-based analytics platform optimized for Azure. It will be used in this lab to build and train a machine learning model used to predict flight delays.
+
+> **Note**: To view the Azure portal menu, select the menu icon in the upper left-hand corner.
+
+![The Azure portal menu is highlighted.](media/portal-menu.png 'Azure portal menu')
+
+1. In the [Azure Portal](https://portal.azure.com) (https://portal.azure.com), select **+ Create a resource** within the portal menu, then type "Azure Databricks" into the search bar. Select Azure Databricks from the results.
+
+   ![Select create a resource, type in Azure Databricks, then select it from the results list](media/create-azure-databricks-resource.png)
+
+2. Select Create on the bottom of the blade that follows.
+
+3. Set the following configuration on the Azure Databricks Service creation form:
+
+   - **Name**: Enter a unique name as indicated by a green checkmark.
+
+   - **Subscription**: Select the subscription you are using for this hands-on lab.
+
+   - **Resource Group**: Select **Create new** and enter a unique name, such as "hands-on-lab-bigdata".
+
+   - **Location**: Select a region close to you. **_(If you are using an Azure Pass, select South Central US.)_**
+
+   - **Pricing**: Select Premium.
+
+   - **Deploy Azure Databricks workspace in your Virtual Network**: Select No.
+
+   ![Complete the Azure Databricks Service creation form with the options as outlined above.](./media/databricks1.png)
+
+4. Select **Create** to finish and submit.
+
+### Task 4: Retrieve Azure Storage account information and Subscription Id
 
 You will need to have the Azure Storage account name and access key when you create your Azure Databricks cluster during the lab. You will also need to create storage containers in which you will store your flight and weather data files.
 
@@ -106,17 +186,17 @@ You will need to have the Azure Storage account name and access key when you cre
 
 2. Next, select your lab Azure Storage account from the list.
 
-   ![Select the lab Azure Storage account from within your lab resource group.](media/select-azure-storage-account.png)
+   ![Select the lab Azure Storage account from within your lab resource group.](./media/storage3.png)
 
 3. On the Overview blade, locate and copy your Azure **Subscription Id** and save to a text editor such as Notepad for later.
 
-   ![Copy the Azure Subscription Id on the Overview blade.](media/azure-storage-subscription-id.png)
+   ![Copy the Azure Subscription Id on the Overview blade.](./media/storage4.png)
 
 4. Select **Access keys** (1) from the menu. Copy the **storage account name** (2) and the **key1** key (3) and copy the values to a text editor such as Notepad for later.
 
-   ![Select Access keys from menu - copy storage account name - copy key.](media/azure-storage-access-keys.png)
+   ![Select Access keys from menu - copy storage account name - copy key.](./media/storage5.png)
 
-### Task 2: Create an Azure Databricks cluster
+### Task 5: Create an Azure Databricks cluster
 
 You have provisioned an Azure Databricks workspace, and now you need to create a new cluster within the workspace. Part of the cluster configuration includes setting up an account access key to your Azure Storage account, using the Spark Config within the new cluster form. This will allow your cluster to access the lab files.
 
@@ -144,9 +224,7 @@ You have provisioned an Azure Databricks workspace, and now you need to create a
 
    - **Cluster Type**: Standard
 
-   - **Databricks Runtime Version**: Runtime: 5.5 (Scala 2.11, Spark 2.4.3) (**Note**: the runtime version may have **LTS** after the version. This is also a valid selection.)
-
-   - **Python Version**: 3
+   - **Databricks Runtime Version**: Runtime: 6.2 (Scala 2.11, Spark 2.4.4) (**Note**: the runtime version may have **LTS** after the version. This is also a valid selection.)
 
    - **Enable Autoscaling**: Uncheck this option.
 
@@ -164,7 +242,7 @@ You have provisioned an Azure Databricks workspace, and now you need to create a
 
    **Example:** `spark.hadoop.fs.azure.account.key.bigdatalabstore.blob.core.windows.net HD+91Y77b+TezEu1lh9QXXU2Va6Cjg9bu0RRpb/KtBj8lWQa6jwyA0OGTDmSNVFr8iSlkytIFONEHLdl67Fgxg==`
 
-   ![Complete the form using the options as outlined above.](media/azure-databricks-create-cluster-form.png)
+   ![Complete the form using the options as outlined above.](./media/databricks2.png)
 
 6. Select **Create Cluster**.
 
@@ -231,6 +309,14 @@ In this exercise, you will implement a classification experiment. You will load 
 5. **Wait** until the library's status shows as **Installed** before continuing.
 
    ![The new library is shown with a status of Installed.](media/azure-databricks-cluster-libraries-installed.png 'Libraries')
+   
+6. In the Install Library dialog, select **PyPi** for the Library Source, then enter the following in the Package field: `MLflow`. Select **Install**.
+
+![The Install Library dialog is displayed with PyPi selected as the Library Source, and the package name entered into the Package field.](./media/databricks-mlflow.png)
+
+7. **Wait** until the library's status shows as **Installed** before continuing
+
+![The new library is shown with a status of Installed.](./media/databricks-libraries-installed.png)
 
 ### Task 3: Open Azure Databricks and complete lab notebooks
 
@@ -266,51 +352,41 @@ Duration: 20 minutes
 
 In this exercise, you will create a baseline environment for Azure Data Factory development for further operationalization of data movement and processing. You will create a Data Factory service, and then install the Data Management Gateway which is the agent that facilitates data movement from on-premises to Microsoft Azure.
 
-### Task 1: Download and stage data to be processed
+### Task 1: Provision Azure Data Factory
 
-1. Open a web browser.
+Create a new Azure Data Factory instance that will be used to orchestrate data transfers for analysis.
 
-2. Download the AdventureWorks sample data from <http://bit.ly/2zi4Sqa>.
+1. In the [Azure Portal](https://portal.azure.com) (<https://portal.azure.com>), select **+ Create a resource**, then type "Data Factory" into the search bar. Select **Data Factory** from the results.
 
-3. Extract it to a new folder called **C:\\Data**.
+   ![Select create a resource, type in Data Factory, then select Data Factory from the results list](media/create-azure-data-factory.png)
 
-### Task 2: Install and configure Azure Data Factory Integration Runtime on your machine
+2. Select Create on the bottom of the blade that follows.
 
-1. To download the latest version of Azure Data Factory Integration Runtime, go to <https://www.microsoft.com/en-us/download/details.aspx?id=39717>.
+3. Set the following configuration on the Data Factory creation form:
 
-   ![The Azure Data Factory Integration Runtime Download webpage displays.](media/image112.png 'Azure Data Factory Integration Runtime Download webpage')
+   - **Name**: Enter a unique name as indicated by a green checkmark.
 
-2. Select Download, then choose the download you want from the next screen.
+   - **Subscription**: Select the subscription you are using for this hands-on lab.
 
-   ![Under Choose the download you want, the MSI file is selected.](media/image113.png 'Choose the download you want section')
+   - **Resource Group**: Select the same resource group you created at the beginning of this lab.
 
-3. Run the installer, once downloaded.
+   - **Version**: Select V2.
 
-4. When you see the following screen, select Next.
+   - **Location**: Select any region close to you.
 
-   ![The Welcome page in the Microsoft Integration Runtime Setup Wizard displays.](media/image114.png 'Microsoft Integration Runtime Setup Wizard')
+   - **Enable GIT**: Unchecked.
 
-5. Check the box to accept the terms and select Next.
+   **_Understanding Data Factory Location:_**
+   The Data Factory location is where the metadata of the data factory is stored and where the triggering of the pipeline is initiated from. Meanwhile, a data factory can access data stores and compute services in other Azure regions to move data between data stores or process data using compute services. This behavior is realized through the [globally available IR](https://azure.microsoft.com/en-us/global-infrastructure/services/?products=data-factory) to ensure data compliance, efficiency, and reduced network egress costs.
 
-   ![On the End-User License Agreement page, the check box to accept the license agreement is selected, as is the Next button.](media/image115.png 'End-User License Agreement page')
+   The IR Location defines the location of its back-end compute, and essentially the location where the data movement, activity dispatching, and SSIS package execution are performed. The IR location can be different from the location of the data factory it belongs to.
 
-6. Accept the default Destination Folder, and select Next.
+   ![Complete the Azure Data Factory creation form with the options as outlined above.](media/azure-data-factory1.png)
 
-   ![On the Destination folder page, the destination folder is set to C;\Program Files\Microsoft Integration Runtime\ and the Next button is selected.](media/image116.png 'Destination folder page')
+4. Select **Create** to finish and submit.
 
-7. Choose Install to complete the installation.
 
-   ![On the Ready to install Microsoft Integration Runtime page, the Install button is selected.](media/image117.png 'Ready to install page')
-
-8. Select Finish once the installation has completed.
-
-   ![On the Completed the Microsoft Integration Runtime Setup Wizard page, the Finish button is selected.](media/image118.png 'Completed the Wizard page')
-
-9. After selecting Finish, the following screen will appear. Keep it open for now. You will come back to this screen once the Data Factory in Azure has been provisioned, and obtain the gateway key so we can connect Data Factory to this "on-premises" server.
-
-   ![The Microsoft Integration Runtime Configuration Manager, Register Integration Runtime page displays.](media/image119.png 'Register Integration Runtime page')
-
-### Task 3: Configure Azure Data Factory
+### Task 2: Configure Azure Data Factory
 
 1. Launch a new browser window, and navigate to the Azure portal (<https://portal.azure.com>). Once prompted, log in with your Microsoft Azure credentials. If prompted, choose whether your account is an organization account or a Microsoft account. This will be based on which account was used to provision your Azure subscription that is being used for this lab.
 
@@ -381,7 +457,7 @@ Duration: 20 minutes
 
 In this exercise, you will create an Azure Data Factory pipeline to copy data (.CSV files) from an on-premises server (your machine) to Azure Blob Storage. The goal of the exercise is to demonstrate data movement from an on-premises location to Azure Storage (via the Integration Runtime).
 
-### Task 1: Create copy pipeline using the Copy Data Wizard
+### Task: Create copy pipeline using the Copy Data Wizard
 
 1. Within the Azure Data Factory overview page, select **Copy Data**.
 
@@ -429,11 +505,11 @@ In this exercise, you will create an Azure Data Factory pipeline to copy data (.
 
 7. Select **Test connection** to verify you correctly entered the values. Finally, select **Create**.
 
-   ![On the Copy Data activity, specify File server share connection page, fields are set to the previously defined values.](media/adf-copy-data-linked-service-settings.png 'New Linked Service settings')
+   ![On the Copy Data activity, specify File server share connection page, fields are set to the previously defined values.](media/adf-new-linked-service.png 'New Linked Service settings')
 
 8. On the Source data store page, select **Next**.
 
-   ![Select Next](media/adf-copy-data-source-next.png 'Select Next')
+   ![Select Next](./media/adf-data-source.png 'Select Next')
 
 9. On the **Choose the input file or folder** screen, select **Browse**, then select the **FlightsAndWeather** folder. Next, select **Load all files** under file loading behavior, check **Copy file recursively**, then select **Next**.
 
